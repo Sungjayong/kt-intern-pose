@@ -4,6 +4,7 @@ import mediapipe as mp
 import math
 import os
 import json
+import requests
 
 class Point:
     x = 0
@@ -15,6 +16,7 @@ ready_success_len = swing_success_len = finish_success_len = 0
 ready_feedback = swing_feedback = finish_feedback = ""
 #가장 오차가 심한 점수를 알아내기 위한 최대 오차 확인용 변수
 maxDiff_ready = maxDiff_swing = maxDiff_finish = 0
+isErrorSwing = isErrorReady = isErrorFinish = 0 #true or false
 
 def Angle(P1, P2, P3):
     a = math.sqrt(math.pow(P1.x - P2.x, 2) + math.pow(P1.y - P2.y, 2))
@@ -128,9 +130,9 @@ BASESCORE_READY = [72.53, 69.72, 72.47, 85.34, 172.4, 173.95]
 BASESCORE_SWING = [156.0, 170.63, 169.8, 131.81, 138.6]
 BASESCORE_FINISH = [144.31, 162.99]
 
-DATA_DIR = os.getcwd() + "/web"
+DATA_DIR = os.getcwd() + "/images"
 IMAGE_FILES = os.listdir(DATA_DIR)
-print(IMAGE_FILES)
+# print(IMAGE_FILES)
 
 with mp_pose.Pose(
         static_image_mode=True,
@@ -144,7 +146,11 @@ with mp_pose.Pose(
 
         # Convert the BGR image to RGB before processing.
         results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        if not results.pose_landmarks: continue
+        if not results.pose_landmarks:
+            if(idx == 0) : isErrorReady = 1
+            elif(idx == 1): isErrorSwing = 1
+            elif(idx == 2): isErrorFinish = 1
+            continue
         annotated_image = image.copy()
         ll = [] # 각 번호마다의 위치를 저장하기 위한 임시 배열.
 
@@ -159,8 +165,8 @@ with mp_pose.Pose(
         # Draw pose landmarks on the image.
         mp_drawing.draw_landmarks(
             annotated_image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-        cv2.imwrite('web_result/annotated_image' + str(idx) + '.png', annotated_image)
-        if (file.find('ready') != -1):
+        cv2.imwrite('images_result/annotated_image' + str(idx) + '.png', annotated_image)
+        if (file.find('first') != -1):
             one = Angle2(ll[23], ll[24], ll[27], ll[28])
             two = Angle2(ll[23], ll[24], ll[27], ll[28])
             three = Angle(ll[12], ll[11], ll[13])
@@ -175,7 +181,7 @@ with mp_pose.Pose(
             eval_ready(abs(round(five, 2) - BASESCORE_READY[4]), 4, "왼쪽팔꿈치")
             eval_ready(abs(round(six, 2) - BASESCORE_READY[5]), 5, "오른쪽팔꿈치")
 
-        if (file.find('swing') != -1):
+        if (file.find('second') != -1):
             ones = Angle(ll[12], ll[24], ll[26])
             twos = Angle(ll[24], ll[26], ll[28])
             threes = Angle(ll[23], ll[25], ll[27])
@@ -188,7 +194,7 @@ with mp_pose.Pose(
             eval_swing(abs(round(fours, 2) - BASESCORE_SWING[3]), 3, "오른쪽 어깨")
             eval_swing(abs(round(fives, 2) - BASESCORE_SWING[4]), 4, "오른쪽 팔꿈치")
 
-        if (file.find('finish') != -1):
+        if (file.find('third') != -1):
             onef = Angle(ll[24], ll[26], ll[28])
             twof = Angle(ll[12], ll[24], ll[26])
             eval_finish(abs(round(onef, 2) - BASESCORE_FINISH[0]), 0, "오른쪽 무릎")
@@ -198,20 +204,23 @@ with mp_pose.Pose(
     sDict = {5: 'Excellent', 4: 'Excellent', 3: 'Perfect', 2: 'Good', 1: 'Good', 0: 'Fail'}
     fDict = {2: 'Excellent', 1: 'Perfect', 0: 'Good'}
 
-    print('본 프로그램은 아이언, 드라이브 모두에 적용됩니다.')
-    print('---------- 준비 자세 ----------')
-    print('결과 : ',rDict[ready_success_len])
-    print('아쉬운 자세 : ', ready_feedback)
-    print('---------- 스윙 자세 ----------')
-    print('결과 : ', sDict[swing_success_len])
-    print('아쉬운 자세 : ', swing_feedback)
-    print('---------- 피니시 자세 ----------')
-    print('결과 : ', fDict[finish_success_len])
-    print('아쉬운 자세 : ', finish_feedback)
+    # print('본 프로그램은 아이언, 드라이브 모두에 적용됩니다.')
+    # print('---------- 준비 자세 ----------')
+    # print('결과 : ',rDict[ready_success_len])
+    # print('아쉬운 자세 : ', ready_feedback)
+    # print('---------- 스윙 자세 ----------')
+    # print('결과 : ', sDict[swing_success_len])
+    # print('아쉬운 자세 : ', swing_feedback)
+    # print('---------- 피니시 자세 ----------')
+    # print('결과 : ', fDict[finish_success_len])
+    # print('아쉬운 자세 : ', finish_feedback)
 
     result = {'ready_result': rDict[ready_success_len], 'ready_feedback': ready_feedback,
               'swing_result': sDict[swing_success_len], 'swing_feedback': swing_feedback,
               'finish_result': fDict[finish_success_len], 'finish_feedback': finish_feedback
+              , 'isErrorReady': isErrorReady, 'isErrorSwing' : isErrorSwing, 'isErrorFinish': isErrorFinish
               }
-    jsonResult = json.dumps(result)
-    print(jsonResult)
+    # resultText = json.dumps(result)
+    resultText = {"resultText":result}
+    res = requests.post('http://localhost:5000/api/feedbackdata', json=resultText)
+    # print(resultText)

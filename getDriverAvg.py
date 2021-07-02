@@ -33,8 +33,8 @@ def Angle2(P11,P12,P2,P3):
 #각도에 대하여 절사 평균값 return 함수
 def getCutAvg (list):
   list.sort()
-  list.pop()
-  list.pop(0)
+  #list.pop()
+  #list.pop(0)
   return sum(list)/len(list)
 
 mp_drawing = mp.solutions.drawing_utils
@@ -93,7 +93,7 @@ with mp_pose.Pose(
     # Draw pose landmarks on the image.
     mp_drawing.draw_landmarks(
       annotated_image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-    cv2.imwrite('result/drive/annotated_image' + str(idx) + '.png', annotated_image)
+    cv2.imwrite('result/annotated_image' + str(idx) + '.png', annotated_image)
     if(file.find('ready') != -1):
       one = Angle2(ll[23], ll[24], ll[27], ll[28])
       two = Angle2(ll[23], ll[24], ll[28], ll[27])
