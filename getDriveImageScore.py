@@ -164,6 +164,7 @@ with mp_pose.Pose(
         # Draw pose landmarks on the image.
         mp_drawing.draw_landmarks(
             annotated_image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
         cv2.imwrite('images_result/annotated_image' + str(idx) + '.png', annotated_image)
         if (file.find('first') != -1):
             one = Angle2(ll[23], ll[24], ll[27], ll[28])
