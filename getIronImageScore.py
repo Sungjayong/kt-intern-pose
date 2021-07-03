@@ -141,7 +141,7 @@ with mp_pose.Pose(
         model_complexity=2,
         min_detection_confidence=0.5) as pose:
     for idx, file in enumerate(IMAGE_FILES):
-        if (file.find('drive') == -1): continue
+        if (file.find('iron') == -1): continue
         file = DATA_DIR + '/' + file
         image = cv2.imread(file)
         image_height, image_width, _ = image.shape
@@ -209,7 +209,7 @@ with mp_pose.Pose(
     sDict = {5: 'Excellent', 4: 'Excellent', 3: 'Perfect', 2: 'Good', 1: 'Good', 0: 'Fail'}
     fDict = {2: 'Excellent', 1: 'Perfect', 0: 'Fail'}
 
-    # print('본 프로그램은 아이언, 드라이브 모두에 적용됩니다.')
+    # print('본 프로그램은 아이언에 적용됩니다.')
     # print('---------- 준비 자세 ----------')
     # print('결과 : ',rDict[ready_success_len])
     # print('아쉬운 자세 : ', ready_feedback)
