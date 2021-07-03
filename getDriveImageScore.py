@@ -3,7 +3,6 @@ import cv2
 import mediapipe as mp
 import math
 import os
-import json
 import requests
 
 class Point:

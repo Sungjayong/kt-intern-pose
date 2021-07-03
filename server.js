@@ -39,6 +39,7 @@ let feedbackdata = {d: 1};
 
 app.post("/api/feedback",  (req, res) => {
    const spawn = require('child_process').spawn; // 2. spawn을 통해 "python 파이썬파일.py" 명령어 실행
+
    const result =  spawn('python3', ['getDriveImageScore.py']); // 3. stdout의 'data'이벤트리스너로 실행결과를 받는다.
    result.stdout.on('data', (data) => {
 //     console.log(`stdout: ${data}`);
