@@ -4,7 +4,6 @@ const PORT = 5000;
 const cors = require('cors');
 const fs = require('fs')
 
-
 const base64Img = require("base64-img");
 
 app.use(cors());

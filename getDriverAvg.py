@@ -95,7 +95,7 @@ with mp_pose.Pose(
     mp_drawing.draw_landmarks(
       annotated_image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
     cv2.imwrite('result/annotated_image' + str(idx) + '.png', annotated_image)
-    if(file.find('ready') != -1):
+    if(file.find('first') != -1):
       one = Angle2(ll[23], ll[24], ll[27], ll[28])
       two = Angle2(ll[23], ll[24], ll[28], ll[27])
       three = Angle(ll[12], ll[11], ll[13])
@@ -110,7 +110,7 @@ with mp_pose.Pose(
       r_list_5.append(round(five, 2))
       r_list_6.append(round(six, 2))
 
-    if (file.find('swing') != -1):
+    if (file.find('second') != -1):
       ones = Angle(ll[12], ll[24], ll[26])
       twos = Angle(ll[24], ll[26], ll[28])
       threes = Angle(ll[23], ll[25], ll[27])
@@ -123,7 +123,7 @@ with mp_pose.Pose(
       s_list_4.append(round(fours, 2))
       s_list_5.append(round(fives, 2))
 
-    if (file.find('finish') != -1):
+    if (file.find('third') != -1):
       onef = Angle(ll[24], ll[26], ll[28])
       twof = Angle(ll[12], ll[24], ll[26])
 
