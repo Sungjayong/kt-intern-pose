@@ -45,10 +45,11 @@ def Distance(P1,P2):
 # skeleton : 각 각도에 대한 한글명
 # minNum, maxNum : 스켈레톤에 최솟값, 최댓값
 def eval_ready(rs, skeleton, minNum, maxNum):
-    global ready_success_len, ready_feedback
+    global ready_success_len, ready_feedback, isErrorReady
     if skeleton == "keyCheck":
-        if rs < 150:
-            ready_feedback = ""
+        if rs < 110:
+            isErrorReady = 1
+            ready_success_len = 0
         return
     if minNum < rs < maxNum:
         ready_success_len += 1
@@ -60,10 +61,11 @@ def eval_ready(rs, skeleton, minNum, maxNum):
 
 
 def eval_swing(rs, skeleton, minNum, maxNum):
-    global swing_success_len, swing_feedback
+    global swing_success_len, swing_feedback, isErrorSwing
     if skeleton == "keyCheck":
-        if rs < 150:
-            swing_feedback = ""
+        if rs < 110:
+            isErrorSwing = 1
+            swing_success_len = 0
         return
     if minNum < rs < maxNum:
         swing_success_len += 1
@@ -74,10 +76,11 @@ def eval_swing(rs, skeleton, minNum, maxNum):
             swing_feedback = swing_feedback + ", " + skeleton
 
 def eval_finish(rs, skeleton, minNum, maxNum):
-    global finish_success_len, finish_feedback
+    global finish_success_len, finish_feedback, isErrorFinish
     if skeleton == "keyCheck":
-        if rs < 150:
-            finish_feedback = ""
+        if rs < 110:
+            isErrorFinish = 1
+            finish_success_len = 0
         return
     if minNum < rs < maxNum:
         finish_success_len += 1
@@ -140,21 +143,20 @@ with mp_pose.Pose(
 
 
         cv2.imwrite('images_result/annotated_image' + str(num) + '.png', annotated_image)
-        num += 1
         if (file.find('first') != -1):
             one = Angle2(ll[23], ll[24], ll[27], ll[28])
-            two = Angle2(ll[23], ll[24], ll[27], ll[28])
+            two = Angle2(ll[23], ll[24], ll[28], ll[27])
             three = Angle(ll[12], ll[11], ll[13])
             four = Angle(ll[11], ll[12], ll[14])
             five = Angle(ll[11], ll[13], ll[15])
             six = Angle(ll[12], ll[14], ll[16])
-            length1 = Distance(ll[0], ll[27])
+            length1 = Distance(ll[0], ll[25])
             eval_ready(round(one, 2), "왼발", 65, 89)
             eval_ready(round(two, 2), "오른발", 61, 89)
-            eval_ready(round(three, 2), "왼쪽어깨", 50, 93)
-            eval_ready(round(four, 2), "오른쪽어깨", 60, 92)
-            eval_ready(round(five, 2), "왼쪽팔꿈치", 155, 180)
-            eval_ready(round(six, 2), "오른쪽팔꿈치", 160, 180)
+            eval_ready(round(three, 2), "왼쪽 어깨", 50, 93)
+            eval_ready(round(four, 2), "오른쪽 어깨", 60, 92)
+            eval_ready(round(five, 2), "왼쪽 팔꿈치", 155, 180)
+            eval_ready(round(six, 2), "오른쪽 팔꿈치", 160, 180)
             eval_ready(round(length1, 2), "keyCheck", 0, 0)
 
         if (file.find('second') != -1):
@@ -163,7 +165,7 @@ with mp_pose.Pose(
             threes = Angle(ll[23], ll[25], ll[27])
             fours = Angle(ll[11], ll[12], ll[14])
             fives = Angle(ll[12], ll[14], ll[16])
-            length2 = Distance(ll[0], ll[27])
+            length2 = Distance(ll[0], ll[25])
             eval_swing(round(ones, 2), "오른쪽 허리", 140, 180)
             eval_swing(round(twos, 2), "오른쪽 무릎", 167, 180)
             eval_swing(round(threes, 2), "왼쪽 무릎", 165, 180)
@@ -174,12 +176,12 @@ with mp_pose.Pose(
         if (file.find('third') != -1):
             onef = Angle(ll[24], ll[26], ll[28])
             twof = Angle(ll[12], ll[24], ll[26])
-            length3 = Distance(ll[0], ll[27])
+            length3 = Distance(ll[0], ll[25])
             eval_finish(round(onef, 2), "오른쪽 무릎", 125, 180)
             eval_finish(round(twof, 2), "오른쪽 허리", 155, 175)
             eval_finish(round(length3, 2), "keyCheck", 0, 0)
 
-    rDict = {6:'Perfect', 5: 'Good', 4: 'Good', 3: 'Notbad', 2: 'Fail', 1: 'Fail', 0: 'Fail'}
+    rDict = {6: 'Perfect', 5: 'Good', 4: 'Good', 3: 'Notbad', 2: 'Fail', 1: 'Fail', 0: 'Fail'}
     sDict = {5: 'Perfect', 4: 'Good', 3: 'Good', 2: 'Notbad', 1: 'Fail', 0: 'Fail'}
     fDict = {2: 'Perfect', 1: 'Notbad', 0: 'Fail'}
 
@@ -201,6 +203,7 @@ with mp_pose.Pose(
               'swing_result': sDict[swing_success_len], 'swing_feedback': swing_feedback,
               'finish_result': fDict[finish_success_len], 'finish_feedback': finish_feedback
               , 'isErrorReady': isErrorReady, 'isErrorSwing' : isErrorSwing, 'isErrorFinish': isErrorFinish
+                , 'length1': length1, 'length2': length2, 'length3': length3
               }
     resultText = {"resultText":result}
-    # res = requests.post('http://localhost:5000/api/feedbackdata', json=resultText)
+    res = requests.post('http://localhost:5000/api/feedbackdata', json=resultText)

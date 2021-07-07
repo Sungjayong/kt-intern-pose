@@ -4,6 +4,9 @@ import mediapipe as mp
 import math
 import os
 import requests
+#나는야 코딩왕
+#성자드래곤
+#나는야부산사람
 
 class Point:
     x = 0
@@ -24,6 +27,17 @@ def Angle(P1, P2, P3):
     angle = math.acos((a * a + b * b - c * c) / (2 * a * b))
     return (angle * 180) / PI
 
+#p11, p12의 중심점, p2, p3의 각도를 return하는 함수.
+def Angle2(P11, P12, P2, P3):
+    P1 = Point()
+    P1.x = (P11.x + P12.x) / 2
+    P1.y = (P11.y + P12.y) / 2
+    a = math.sqrt(math.pow(P1.x - P2.x, 2) + math.pow(P1.y - P2.y, 2))
+    b = math.sqrt(math.pow(P2.x - P3.x, 2) + math.pow(P2.y - P3.y, 2))
+    c = math.sqrt(math.pow(P1.x - P3.x, 2) + math.pow(P1.y - P3.y, 2))
+    angle = math.acos((a * a + b * b - c * c) / (2 * a * b))
+    return (angle * 180) / PI
+
 #피타코라스 활용 거리 return 함수
 def Distance(P1,P2):
     distance = math.sqrt(pow(P1.x-P2.x, 2)+pow(P1.y-P2.y, 2))
@@ -34,10 +48,11 @@ def Distance(P1,P2):
 # skeleton : 각 각도에 대한 한글명
 # minNum, maxNum : 스켈레톤에 최솟값, 최댓값
 def eval_ready(rs, skeleton, minNum, maxNum):
-    global ready_success_len, ready_feedback
+    global ready_success_len, ready_feedback, isErrorReady
     if skeleton == "keyCheck":
-        if rs < 150:
-            ready_feedback = ""
+        if rs < 110:
+            isErrorReady = 1
+            ready_success_len = 0
         return
     if minNum < rs < maxNum:
         ready_success_len += 1
@@ -48,10 +63,11 @@ def eval_ready(rs, skeleton, minNum, maxNum):
             ready_feedback = ready_feedback + ", " + skeleton
 
 def eval_swing(rs, skeleton, minNum, maxNum):
-    global swing_success_len, swing_feedback
+    global swing_success_len, swing_feedback, isErrorSwing
     if skeleton == "keyCheck":
-        if rs < 150:
-            swing_feedback = ""
+        if rs < 110:
+            isErrorSwing = 1
+            swing_success_len = 0
         return
     if minNum < rs < maxNum:
         swing_success_len += 1
@@ -62,10 +78,11 @@ def eval_swing(rs, skeleton, minNum, maxNum):
             swing_feedback = swing_feedback + ", " + skeleton
 
 def eval_finish(rs, skeleton, minNum, maxNum):
-    global finish_success_len, finish_feedback
+    global finish_success_len, finish_feedback, isErrorFinish
     if skeleton == "keyCheck":
-        if rs < 150:
-            finish_feedback = ""
+        if rs < 110:
+            isErrorFinish = 1
+            finish_success_len = 0
         return
     if minNum < rs < maxNum:
         finish_success_len += 1
@@ -125,60 +142,60 @@ with mp_pose.Pose(
         if (file.find('first') != -1):
             one = Angle(ll[11], ll[12], ll[14])
             two = Angle(ll[12], ll[11], ll[13])
-            three = Angle(ll[26], ll[28], ll[27])
-            four = Angle(ll[25], ll[27], ll[28])
-            length1 = Distance(ll[0], ll[27])
+            three = Angle2(ll[23], ll[24], ll[28], ll[27])
+            four = Angle2(ll[23], ll[24], ll[27], ll[28])
+            length1 = Distance(ll[0], ll[25])
             eval_ready(round(one, 2), "오른쪽 어깨", 60, 92)
             eval_ready(round(two, 2), "왼쪽 어깨", 50, 93)
-            eval_ready(round(three, 2), "오른쪽 발", 61, 89)
-            eval_ready(round(four, 2), "왼쪽 발", 65, 89)
+            eval_ready(round(three, 2), "오른발", 61, 89)
+            eval_ready(round(four, 2), "왼발", 65, 89)
             eval_ready(round(length1, 2), "keyCheck", 0, 0)
 
         if (file.find('second') != -1):
             ones = Angle(ll[11], ll[12], ll[14])
             twos = Angle(ll[12], ll[11], ll[13])
-            threes = Angle(ll[26], ll[28], ll[27])
-            fours = Angle(ll[25], ll[27], ll[28])
-            length2 = Distance(ll[0], ll[27])
-            eval_swing(round(one, 2), "오른쪽 어깨", 60, 92)
-            eval_swing(round(two, 2), "왼쪽 어깨", 50, 93)
-            eval_swing(round(three, 2), "오른쪽 발", 61, 89)
-            eval_swing(round(four, 2), "왼쪽 발", 65, 89)
+            threes = Angle2(ll[23], ll[24], ll[28], ll[27])
+            fours = Angle2(ll[23], ll[24], ll[27], ll[28])
+            length2 = Distance(ll[0], ll[25])
+            eval_swing(round(ones, 2), "오른쪽 어깨", 60, 92)
+            eval_swing(round(twos, 2), "왼쪽 어깨", 50, 93)
+            eval_swing(round(threes, 2), "오른발", 61, 89)
+            eval_swing(round(fours, 2), "왼발", 65, 89)
             eval_swing(round(length2, 2), "keyCheck", 0, 0)
-
 
         if (file.find('third') != -1):
             onef = Angle(ll[11], ll[12], ll[14])
             twof = Angle(ll[12], ll[11], ll[13])
-            threef = Angle(ll[26], ll[28], ll[27])
-            fourf = Angle(ll[25], ll[27], ll[28])
-            length3 = Distance(ll[0], ll[27])
-            eval_finish(round(one, 2), "오른쪽 어깨", 60, 92)
-            eval_finish(round(two, 2), "왼쪽 어깨", 50, 93)
-            eval_finish(round(three, 2), "오른쪽 발", 61, 89)
-            eval_finish(round(four, 2), "왼쪽 발", 65, 89)
+            threef = Angle2(ll[23], ll[24], ll[28], ll[27])
+            fourf = Angle2(ll[23], ll[24], ll[27], ll[28])
+            length3 = Distance(ll[0], ll[25])
+            eval_finish(round(onef, 2), "오른쪽 어깨", 60, 92)
+            eval_finish(round(twof, 2), "왼쪽 어깨", 50, 93)
+            eval_finish(round(threef, 2), "오른발", 61, 89)
+            eval_finish(round(fourf, 2), "왼발", 65, 89)
             eval_finish(round(length3, 2), "keyCheck", 0, 0)
 
     dict = {4: 'Perfect', 3: 'Good', 2: 'Notbad', 1: 'Fail', 0: 'Fail'}
 
-    print('본 프로그램은 퍼터에 적용됩니다.')
-    print('---------- 준비 자세 ----------')
-    print('결과 : ', dict[ready_success_len])
-    print('아쉬운 자세 : ', ready_feedback)
-    print(ready_success_len)
-    print('---------- 스윙 자세 ----------')
-    print('결과 : ', dict[swing_success_len])
-    print('아쉬운 자세 : ', swing_feedback)
-    print(swing_success_len)
-    print('---------- 피니시 자세 ----------')
-    print('결과 : ', dict[finish_success_len])
-    print('아쉬운 자세 : ', finish_feedback)
-    print(finish_success_len)
+    # print('본 프로그램은 퍼터에 적용됩니다.')
+    # print('---------- 준비 자세 ----------')
+    # print('결과 : ', dict[ready_success_len])
+    # print('아쉬운 자세 : ', ready_feedback)
+    # print(ready_success_len)
+    # print('---------- 스윙 자세 ----------')
+    # print('결과 : ', dict[swing_success_len])
+    # print('아쉬운 자세 : ', swing_feedback)
+    # print(swing_success_len)
+    # print('---------- 피니시 자세 ----------')
+    # print('결과 : ', dict[finish_success_len])
+    # print('아쉬운 자세 : ', finish_feedback)
+    # print(finish_success_len)
 
     result = {'ready_result': dict[ready_success_len], 'ready_feedback': ready_feedback,
               'swing_result': dict[swing_success_len], 'swing_feedback': swing_feedback,
               'finish_result': dict[finish_success_len], 'finish_feedback': finish_feedback,
              'isErrorReady': isErrorReady, 'isErrorSwing': isErrorSwing, 'isErrorFinish': isErrorFinish
+        , 'length1': length1, 'length2': length2, 'length3': length3
     }
     resultText = {"resultText": result}
     res = requests.post('http://localhost:5000/api/feedbackdata', json=resultText)
